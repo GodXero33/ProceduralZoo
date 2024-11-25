@@ -1,16 +1,24 @@
 const ctx = canvas.getContext('2d');
-const creatures = Array.from({ length: 2 }, () => new Creature());
-const creatureControler = new CreatureControl(creatures[1]);
+const creatures = Array.from({ length: 3 }, () => {
+	const x = Math.random() * 400 - 200;
+	const y = Math.random() * 400 - 200;
+	return new Creature(x, y);
+});
+const controls = creatures.map(creature => new CreatureControl(creature));
 let width = 0;
 let height = 0;
 let animating = true;
+
+controls[0].disabled = true;
 
 function draw () {
 	const transforms = ctx.getTransform();
 	ctx.clearRect(0, 0, width, height);
 	ctx.translate(width / 2, height / 2);
 
-	creatureControler.draw(ctx);
+	/* controls.forEach(control => {
+		control.draw(ctx);
+	}); */
 
 	creatures.forEach(creature => {
 		creature.draw(ctx);
@@ -20,7 +28,9 @@ function draw () {
 }
 
 function update () {
-	creatureControler.update();
+	controls.forEach(control => {
+		control.update();
+	});
 
 	creatures.forEach(creature => {
 		creature.update();

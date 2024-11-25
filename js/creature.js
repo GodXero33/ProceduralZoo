@@ -1,30 +1,40 @@
 class Creature {
-	constructor () {
-		this.joinGap = 10;
-		this.length = 20;
-		this.chain = Array.from({ length: this.length }, (_, i) => {
-			const x = -i * this.joinGap;
-			const width = 20;
-			return { x, y: 0, angle: 0, left: { x, y: width / 2 }, right: { x, y: -width / 2 }, width };
-		});
+	constructor (x, y) {
+		this.joinGap = 5;
+		this.length = Math.floor(Math.random() * 50 + 20);
+		this.width = this.length * 0.2;
 		this.controls = {
 			move: false,
 			turnLeft: false,
 			turnRight: false
 		};
-		this.position = { x: 0, y: 0 };
 		this.speed = 0;
 		this.rotation = 0;
 		this.rotationFact = 0.05;
 		// this.minimumRotationAngle = Math.PI * 0.05;
-		this.maxSpeed = 5;
+		this.maxSpeed = this.length * 0.1;
+		this.color = '#' + Math.floor(Math.random() * 256 ** 3).toString(16);
+		this.regainedStamin = true;
+		this.maximumStamina = Math.floor(Math.random() * 900 + 100);
+		this.stamina = this.maximumStamina;
+
+		this.initPosition(x, y);
+	}
+
+	initPosition (px, py) {
+		this.chain = Array.from({ length: this.length }, (_, i) => {
+			const x = px - i * this.joinGap;
+			return { x, y: py, angle: 0, left: { x, y: py + this.width / 2 }, right: { x, y: py - this.width / 2 }, width: this.width };
+		});
+
+		this.position = { x: px, y: py };
 	}
 
 	draw (ctx) {
 		const joinSize = 5;
 		ctx.lineWidth = 2;
 		ctx.fillStyle = '#fff';
-		ctx.strokeStyle = '#f55';
+		ctx.strokeStyle = this.color;
 
 		ctx.beginPath();
 		ctx.lineTo(this.chain[0].x, this.chain[0].y);
@@ -48,8 +58,6 @@ class Creature {
 			ctx.translate(-join.x, -join.y);
 		}); */
 		this.chain.forEach(join => {
-			ctx.fillRect(join.x - joinSize / 2, join.y - joinSize / 2, joinSize, joinSize);
-
 			ctx.beginPath();
 			ctx.moveTo(join.left.x, join.left.y);
 			ctx.lineTo(join.right.x, join.right.y);
@@ -104,12 +112,27 @@ class Creature {
 	}
 
 	movement () {
-		if (this.controls.move) {
+		if (!this.regainedStamin) {
+			this.stamina += 2;
+
+			if (this.stamina >= this.maximumStamina) {
+				this.stamina = this.maximumStamina;
+				this.regainedStamin = true;
+			}
+		}
+
+		if (this.controls.move && this.regainedStamin) {
 			this.speed += 0.1;
+			this.stamina -= 1;
+
+			if (this.stamina == 0) {
+				this.regainedStamin = false;
+			}
 
 			if (this.speed > this.maxSpeed) this.speed = this.maxSpeed;
 		} else {
-			this.speed -= 0.1;
+			this.speed -= 0.02;
+			this.stamina += 2;
 
 			if (this.speed < 0) this.speed = 0;
 		}

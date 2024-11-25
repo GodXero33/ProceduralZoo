@@ -1,5 +1,6 @@
 const ctx = canvas.getContext('2d');
-const creatures = Array.from({ length: 1 }, () => new Creature());
+const creatures = Array.from({ length: 2 }, () => new Creature());
+const creatureControler = new CreatureControl(creatures[1]);
 let width = 0;
 let height = 0;
 let animating = true;
@@ -9,6 +10,8 @@ function draw () {
 	ctx.clearRect(0, 0, width, height);
 	ctx.translate(width / 2, height / 2);
 
+	creatureControler.draw(ctx);
+
 	creatures.forEach(creature => {
 		creature.draw(ctx);
 	});
@@ -17,6 +20,8 @@ function draw () {
 }
 
 function update () {
+	creatureControler.update();
+
 	creatures.forEach(creature => {
 		creature.update();
 	});
